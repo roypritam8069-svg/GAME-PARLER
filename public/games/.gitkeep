@@ -1,0 +1,2 @@
+# Keeps public/games tracked so cover-art files can be dropped in.
+# See README.md for the exact filenames prisma/seed.ts looks for.

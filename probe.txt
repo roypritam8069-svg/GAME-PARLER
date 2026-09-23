@@ -1,0 +1,8 @@
+﻿READY=True after=4s
+RAW_JPG status=200 type=image/jpeg bytes=45227
+OPT_JPG status=200 type=image/jpeg bytes=25818
+HTML_LEN=95795
+HTML_IMG_TAGS=3
+HTML_NEXT_IMAGE_GAMES=33
+HTML_FALLBACK_COUNT=0
+HTML_RAW_GAMES_SRC=0

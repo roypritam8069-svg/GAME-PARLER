@@ -1,0 +1,1119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =====================================================================
+   GAME PARLOUR — GLOBAL STYLES
+   Design source of truth: docs/DESIGN.md
+
+   Every design token exists twice, as required by DESIGN.md §55:
+     1. CSS variable (this file)
+     2. Tailwind theme token (tailwind.config.js)
+   ===================================================================== */
+
+:root {
+  /* --- Base (DESIGN.md §4) --- */
+  --bg-base: #0a0b0f;
+  --bg-surface: #12141a;
+  --bg-elevated: #181b23;
+  --bg-input: #1a1d26;
+  --bg-hover: #232735;
+
+  /* --- Text --- */
+  --text-primary: #f5f7fa;
+  --text-secondary: #a6adbb;
+  --text-muted: #707887;
+  --text-disabled: #4a5162;
+
+  /* --- Borders --- */
+  --border-subtle: #23262f;
+  --border-strong: #2e3340;
+  --border-accent: #7c3aed;
+
+  /* --- Accent --- */
+  --accent-primary: #7c3aed;
+  --accent-hover: #8b5cf6;
+  --accent-secondary: #06b6d4;
+  --accent-glow: rgba(124, 58, 237, 0.15);
+
+  /* --- Status --- */
+  --status-success: #10b981;
+  --status-warning: #f59e0b;
+  --status-danger: #ef4444;
+  --status-info: #3b82f6;
+  --status-pending: #a855f7;
+
+  /* --- Radius (DESIGN.md §10) --- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* --- Elevation (DESIGN.md §11) --- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 0 1px rgba(124, 58, 237, 0.4),
+    0 0 24px rgba(124, 58, 237, 0.25);
+
+  /* --- Motion (DESIGN.md §46) --- */
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasis: cubic-bezier(0.2, 0, 0, 1.2);
+
+  /* --- Layout (DESIGN.md §22 — navbar 64px / 72px) --- */
+  --navbar-height: 64px;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --navbar-height: 72px;
+  }
+}
+
+/* =====================================================================
+   BASE
+   ===================================================================== */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    /* Decorative layers are clipped instead of creating a scrollbar. */
+    overflow-x: clip;
+  }
+
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    /* `clip` (not `hidden`) so `position: sticky` keeps working. */
+    overflow-x: clip;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--accent-primary);
+    color: var(--text-primary);
+  }
+
+  /* next/font loads the real font files and exposes them as CSS variables.
+     The Tailwind font tokens name the same families (DESIGN.md §6: Inter,
+     JetBrains Mono, Noto Sans Bengali), so the utilities are mapped to the
+     loaded variables here — otherwise the tokens would resolve to family names
+     that are not installed and the loaded fonts would never be applied. */
+  .font-sans,
+  .font-display {
+    font-family: var(--font-inter), system-ui, -apple-system, "Segoe UI",
+      sans-serif;
+  }
+
+  .font-mono {
+    font-family: var(--font-jetbrains-mono), monospace;
+  }
+
+  .font-bengali {
+    font-family: var(--font-bengali), var(--font-inter), sans-serif;
+  }
+
+  /* DESIGN.md §7 — "Bengali line-height may increase by 10%" (1.50 → 1.65).
+     Only applied to Bengali-language subtrees (DESIGN.md §59 — lang must
+     change with the language). */
+  [lang="bn"] {
+    line-height: 1.65;
+  }
+
+  /* Visible focus for every interactive element (DESIGN.md §48). */
+  :focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--accent-glow);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) var(--bg-base);
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: var(--bg-base);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--border-strong);
+    border: 2px solid var(--bg-base);
+    border-radius: var(--radius-full);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--bg-hover);
+  }
+}
+
+/* =====================================================================
+   COMPONENTS
+   ===================================================================== */
+
+@layer components {
+  /* --- Layout ------------------------------------------------------- */
+
+  .gp-container {
+    @apply relative mx-auto w-full max-w-content px-lg xl:px-2xl;
+  }
+
+  .gp-eyebrow {
+    @apply text-overline uppercase text-accent-secondary;
+  }
+
+  .gp-skip-link {
+    @apply pointer-events-none fixed left-lg top-lg z-90 -translate-y-3xl rounded-md bg-bg-elevated px-lg py-md text-body-sm text-text-primary opacity-0 transition duration-fast ease-standard;
+  }
+
+  .gp-skip-link:focus-visible {
+    @apply pointer-events-auto translate-y-0 opacity-100;
+  }
+
+  /* --- Buttons (DESIGN.md §17, §18, §63) ---------------------------- */
+
+  .gp-btn {
+    @apply relative inline-flex items-center justify-center gap-sm rounded-md font-semibold transition duration-fast ease-standard;
+  }
+
+  .gp-btn:active {
+    transform: scale(0.98);
+  }
+
+  /* Reduced motion: no lift, only colour changes (DESIGN.md §47) */
+  @media (prefers-reduced-motion: reduce) {
+    .gp-btn-primary:hover,
+    .gp-btn-secondary:hover {
+      transform: none !important;
+    }
+  }
+
+  .gp-btn:disabled,
+  .gp-btn[aria-disabled="true"] {
+    @apply pointer-events-none opacity-50;
+  }
+
+  .gp-btn-primary {
+    @apply bg-accent-primary text-text-primary;
+  }
+
+  .gp-btn-primary:hover {
+    @apply bg-accent-hover;
+    transform: translate3d(0, -1px, 0);
+    box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.4),
+      0 0 24px rgba(124, 58, 237, 0.25);
+  }
+
+  .gp-btn-secondary {
+    @apply border border-border-strong bg-bg-elevated text-text-primary;
+    transition-duration: var(--duration-normal);
+  }
+
+  .gp-btn-secondary:hover {
+    @apply border-border-accent bg-bg-hover;
+    transform: translate3d(0, -1px, 0);
+  }
+
+  .gp-btn-ghost {
+    @apply text-text-secondary;
+  }
+
+  .gp-btn-ghost:hover {
+    @apply bg-bg-hover text-text-primary;
+  }
+
+  .gp-btn-link {
+    @apply text-text-primary;
+  }
+
+  .gp-btn-link:hover {
+    @apply text-accent-secondary;
+  }
+
+  /* --- Navbar (DESIGN.md §22) -------------------------------------- */
+
+  .gp-navbar {
+    transition: background-color var(--duration-normal) var(--ease-standard),
+      border-color var(--duration-normal) var(--ease-standard),
+      box-shadow var(--duration-normal) var(--ease-standard);
+  }
+
+  /* Navbar height token: 64px mobile / 72px desktop (DESIGN.md §22). */
+  .gp-navbar-inner {
+    height: var(--navbar-height);
+  }
+
+  .gp-nav-link {
+    @apply relative inline-flex items-center text-body-sm text-text-secondary transition duration-fast ease-standard;
+  }
+
+  .gp-nav-link:hover,
+  .gp-nav-link:focus-visible {
+    @apply text-text-primary;
+  }
+
+  /* Scroll-spy state (aria-current="true" is set on the same element) */
+  .gp-nav-link-active {
+    @apply text-text-primary;
+  }
+
+  .gp-nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -6px;
+    height: 2px;
+    border-radius: var(--radius-full);
+    background-color: var(--accent-primary);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--duration-normal) var(--ease-standard);
+  }
+
+  .gp-nav-link:hover::after,
+  .gp-nav-link:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  .gp-nav-link-active::after {
+    transform: scaleX(1);
+  }
+
+  .gp-backdrop {
+    @apply absolute inset-0 bg-black/60;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--duration-normal) var(--ease-standard),
+      visibility 0s linear var(--duration-normal);
+  }
+
+  .gp-drawer {
+    visibility: hidden;
+    transform: translate3d(100%, 0, 0);
+    transition: transform var(--duration-normal) var(--ease-standard),
+      visibility 0s linear var(--duration-normal);
+  }
+
+  [data-menu-open="true"] .gp-backdrop,
+  [data-menu-open="true"] .gp-drawer {
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+  [data-menu-open="true"] .gp-backdrop {
+    opacity: 1;
+  }
+
+  [data-menu-open="true"] .gp-drawer {
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* --- Hero + atmosphere (DESIGN.md §23, §46) ---------------------- */
+
+  .gp-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    min-height: calc(100vh - var(--navbar-height));
+    min-height: calc(100svh - var(--navbar-height));
+  }
+
+  /* Static decorative layer.
+     DESIGN.md §46 forbids parallax and particle systems, and §23 forbids
+     animated gradients and busy backgrounds — so every hero layer is static
+     and depth comes from layering, elevation and one-shot entrance motion. */
+  .gp-hero-layer {
+    @apply pointer-events-none absolute left-0 right-0 z-0 select-none;
+    top: -10%;
+    bottom: -10%;
+  }
+
+  .gp-grid-pattern {
+    background-image: linear-gradient(
+        to right,
+        rgba(245, 247, 250, 0.04) 1px,
+        transparent 1px
+      ),
+      linear-gradient(to bottom, rgba(245, 247, 250, 0.04) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+
+  .gp-hero-grid {
+    @apply absolute inset-0;
+    background-image: linear-gradient(
+        to right,
+        rgba(245, 247, 250, 0.04) 1px,
+        transparent 1px
+      ),
+      linear-gradient(to bottom, rgba(245, 247, 250, 0.04) 1px, transparent 1px);
+    background-size: 64px 64px;
+    -webkit-mask-image: radial-gradient(
+      ellipse 70% 60% at 50% 40%,
+      #000 20%,
+      transparent 75%
+    );
+    mask-image: radial-gradient(
+      ellipse 70% 60% at 50% 40%,
+      #000 20%,
+      transparent 75%
+    );
+    }
+
+  .gp-orb {
+    @apply pointer-events-none absolute rounded-full;
+  }
+
+  .gp-orb-primary {
+    top: -20%;
+    left: -10%;
+    width: clamp(280px, 55vw, 640px);
+    aspect-ratio: 1;
+    background: radial-gradient(
+      circle at center,
+      rgba(124, 58, 237, 0.28) 0%,
+      rgba(124, 58, 237, 0.08) 45%,
+      transparent 70%
+    );
+    }
+
+  .gp-orb-secondary {
+    right: -12%;
+    bottom: -18%;
+    width: clamp(240px, 45vw, 560px);
+    aspect-ratio: 1;
+    background: radial-gradient(
+      circle at center,
+      rgba(6, 182, 212, 0.16) 0%,
+      rgba(6, 182, 212, 0.05) 45%,
+      transparent 72%
+    );
+    }
+
+  .gp-hero-ring {
+    position: absolute;
+    top: 12%;
+    right: -14%;
+    width: clamp(260px, 34vw, 520px);
+    aspect-ratio: 1;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    opacity: 0.7;
+  }
+
+  .gp-hero-ring::before {
+    content: "";
+    position: absolute;
+    inset: 12%;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+  }
+
+  .gp-hero-ring::after {
+    content: "";
+    position: absolute;
+    top: 8%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background-color: var(--accent-secondary);
+    opacity: 0.6;
+  }
+
+  .gp-hero-veil {
+    @apply pointer-events-none absolute bottom-0 left-0 right-0 z-10;
+    height: 160px;
+    background: linear-gradient(to bottom, transparent, var(--bg-base));
+  }
+
+  /* --- Entrance + scroll reveal (DESIGN.md §46) -------------------- */
+
+  .gp-rise {
+    animation: gp-rise var(--duration-slow) var(--ease-standard) both;
+  }
+
+  .gp-reveal {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+    transition: opacity var(--duration-slow) var(--ease-standard),
+      transform var(--duration-slow) var(--ease-standard);
+  }
+
+  .gp-reveal[data-visible="true"] {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* --- Loading skeleton (DESIGN.md §42) ---------------------------- */
+
+  .gp-skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--bg-elevated);
+    border-radius: var(--radius-md);
+  }
+
+  .gp-skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(245, 247, 250, 0.06),
+      transparent
+    );
+    animation: gp-shimmer 1.6s var(--ease-standard) infinite;
+  }
+
+  /* --- Game card (DESIGN.md §24) ----------------------------------- */
+
+  .gp-game-card {
+    transition: transform var(--duration-normal) var(--ease-standard),
+      border-color var(--duration-normal) var(--ease-standard),
+      box-shadow var(--duration-normal) var(--ease-standard);
+  }
+
+  /* DESIGN.md §24 — hover is exactly: border accent-hover + translateY(-2px).
+     "No heavy glow", so elevation stays at the restrained shadow-md token
+     (DESIGN.md §11: prefer borders over shadows, avoid excessive shadows). */
+  .gp-game-card:hover,
+  .gp-game-card:focus-within {
+    transform: translate3d(0, -2px, 0);
+    border-color: var(--accent-hover);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Poster gradient overlay (static class — DESIGN.md §24 controlled usage) */
+  .gp-card-overlay {
+    @apply pointer-events-none absolute inset-0;
+    background: linear-gradient(
+      to top,
+      rgba(18, 20, 26, 0.9) 0%,
+      rgba(18, 20, 26, 0.25) 45%,
+      transparent 70%
+    );
+    opacity: 0.85;
+    transition: opacity var(--duration-slow) var(--ease-standard);
+  }
+
+  .gp-game-card:hover .gp-card-overlay,
+  .gp-game-card:focus-within .gp-card-overlay {
+    opacity: 1;
+  }
+
+  .gp-card-media img,
+  .gp-media-fallback {
+    transition: transform var(--duration-slow) var(--ease-standard);
+  }
+
+  /* Small hover movement only (DESIGN.md §46) — no tilt, no 3D rotation. */
+  .gp-game-card:hover .gp-card-media img,
+  .gp-game-card:focus-within .gp-card-media img,
+  .gp-game-card:hover .gp-media-fallback,
+  .gp-game-card:focus-within .gp-media-fallback {
+    transform: scale(1.02);
+  }
+
+  .gp-card-arrow {
+    transition: transform var(--duration-fast) var(--ease-standard);
+  }
+
+  .gp-game-card:hover .gp-card-arrow,
+  .gp-game-card:focus-within .gp-card-arrow {
+    transform: translateX(4px);
+  }
+
+  .gp-media-fallback {
+    @apply absolute inset-0 flex items-center justify-center;
+    background-color: var(--bg-elevated);
+    background-image: linear-gradient(
+        to right,
+        rgba(245, 247, 250, 0.04) 1px,
+        transparent 1px
+      ),
+      linear-gradient(to bottom, rgba(245, 247, 250, 0.04) 1px, transparent 1px),
+      radial-gradient(
+        circle at 50% 120%,
+        rgba(124, 58, 237, 0.22) 0%,
+        transparent 65%
+      );
+    background-size: 64px 64px, 64px 64px, 100% 100%;
+  }
+
+  /* --- Booking modal (DESIGN.md §28, §29, §39) ----------------------
+     z-70 = modal layer (§54); backdrop carries the approved §39 rgba +
+     4px blur; width 640px and padding 2xl are §39 component tokens. */
+
+  .gp-modal-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 16px; /* spacing lg token */
+  }
+
+  .gp-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .gp-modal {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    width: 100%;
+    max-width: 640px; /* §39 medium modal */
+    max-height: calc(100svh - 64px); /* spacing 4xl token */
+    margin-block: auto;
+    flex-direction: column;
+    gap: 24px; /* spacing xl token */
+    padding: 24px;
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg); /* §39 */
+    box-shadow: var(--shadow-lg);
+  }
+
+  @media (min-width: 640px) {
+    .gp-modal {
+      padding: 32px; /* §39 padding 2xl */
+    }
+  }
+
+  .gp-modal-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .gp-modal-footer {
+    @apply flex items-center justify-between gap-lg border-t border-border-subtle pt-lg;
+  }
+
+  .gp-modal-status {
+    @apply flex flex-col items-start py-xl text-body-sm text-text-secondary;
+  }
+
+  /* --- Progress steps (DESIGN.md §28) ------------------------------- */
+
+  .gp-steps {
+    @apply flex flex-wrap items-center gap-x-lg gap-y-sm;
+  }
+
+  .gp-steps li {
+    @apply flex items-center gap-sm text-caption;
+    color: var(--text-muted);
+  }
+
+  .gp-steps li[data-state="current"] {
+    color: var(--text-primary);
+  }
+
+  .gp-steps li[data-state="done"] {
+    color: var(--status-success);
+  }
+
+  .gp-step-marker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    border: 1px solid currentColor;
+    border-radius: var(--radius-full);
+    font-family: var(--font-jetbrains-mono), monospace;
+    font-size: 12px; /* caption token */
+  }
+
+  /* --- Summary + totals (DESIGN.md §29, §30) ------------------------ */
+
+  .gp-review {
+    @apply flex flex-col gap-sm rounded-md border border-border-subtle bg-bg-surface px-lg py-lg;
+  }
+
+  .gp-review > div {
+    @apply flex items-baseline justify-between gap-lg;
+  }
+
+  .gp-review dt {
+    @apply text-caption text-text-secondary;
+  }
+
+  .gp-review dd {
+    @apply text-right text-body-sm text-text-primary;
+  }
+
+  .gp-summary-total {
+    @apply mt-lg rounded-md border border-border-subtle bg-bg-surface px-lg py-lg;
+  }
+
+  /* --- Success state (DESIGN.md §31, §32, §45) ---------------------- */
+
+  .gp-success {
+    @apply flex flex-col items-center text-center;
+  }
+
+  .gp-success .gp-review {
+    width: 100%;
+    text-align: left;
+  }
+
+  .gp-success-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--status-success);
+    border-radius: var(--radius-full);
+    color: var(--status-success);
+    animation: gp-pop var(--duration-slow) var(--ease-standard) both;
+  }
+
+  .gp-qr {
+    @apply mt-xl;
+    width: 240px;
+    max-width: 100%;
+    height: auto;
+    padding: 8px; /* quiet zone (DESIGN.md §32) */
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+  }
+
+  .gp-qr-placeholder {
+    @apply mt-xl flex flex-col items-center;
+  }
+
+  .gp-qr-placeholder .gp-skeleton {
+    width: 240px;
+    max-width: 100%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-md);
+  }
+
+  /* --- Floating WhatsApp (Owner requirement; §49/§54) --------------- */
+
+  .gp-wa-float {
+    position: fixed;
+    right: 16px; /* spacing lg token */
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    z-index: 30; /* §54 → floating elements */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px; /* ≥44px touch target (§49) */
+    border-radius: var(--radius-full);
+    background-color: var(--accent-primary);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-md);
+    transition:
+      transform var(--duration-fast) var(--ease-standard),
+      background-color var(--duration-fast) var(--ease-standard);
+  }
+
+  .gp-wa-float:hover {
+    background-color: var(--accent-hover);
+    transform: translate3d(0, -2px, 0);
+  }
+
+  .gp-wa-float:active {
+    transform: scale(0.98);
+  }
+
+  /* --- Section atmosphere ------------------------------------------ */
+
+  .gp-section-glow {
+    @apply pointer-events-none absolute inset-0 z-0 overflow-hidden;
+  }
+
+  .gp-section-glow::before {
+    content: "";
+    position: absolute;
+    top: -30%;
+    right: -10%;
+    width: clamp(320px, 50vw, 720px);
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: radial-gradient(
+      circle at center,
+      rgba(124, 58, 237, 0.14) 0%,
+      transparent 70%
+    );
+  }
+
+  .gp-cta-panel {
+    background-color: var(--bg-elevated);
+    background-image: radial-gradient(
+        ellipse 80% 120% at 15% 0%,
+        rgba(124, 58, 237, 0.2) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 60% 100% at 100% 100%,
+        rgba(6, 182, 212, 0.1) 0%,
+        transparent 65%
+      );
+  }
+
+  /* --- Particles (DESIGN.md §23/§46 amendment — ADR-008) ------------ */
+  /* ≤16 CSS-only dots, ≥6s gentle drift, decorative and pointer-inert;
+     disabled entirely under prefers-reduced-motion (see below). */
+
+  .gp-particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    border-radius: var(--radius-full);
+    background-color: var(--accent-secondary);
+    opacity: 0.3;
+    animation-name: gp-particle-drift;
+    animation-timing-function: var(--ease-standard);
+    animation-iteration-count: infinite;
+    will-change: transform, opacity;
+  }
+
+  .gp-particle:nth-child(3n) {
+    width: 2px;
+    height: 2px;
+    background-color: var(--accent-primary);
+  }
+
+  .gp-particle:nth-child(4n) {
+    width: 4px;
+    height: 4px;
+    opacity: 0.22;
+  }
+
+  /* --- Forms (DESIGN.md §19, §20, §21) ------------------------------ */
+
+  .gp-label {
+    @apply mb-sm block text-body-sm text-text-secondary;
+  }
+
+  .gp-field {
+    @apply mb-xl;
+  }
+
+  .gp-fieldset {
+    @apply m-0 border-0 p-0;
+  }
+
+  .gp-form-grid {
+    @apply grid grid-cols-1 gap-lg sm:grid-cols-2;
+  }
+
+  /* 44px input height = approved component token (DESIGN.md §19/§9). */
+  .gp-input {
+    width: 100%;
+    height: 44px;
+    padding-inline: 16px; /* spacing lg token */
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 14px; /* body-sm token */
+    color-scheme: dark;
+    transition:
+      border-color var(--duration-fast) var(--ease-standard),
+      box-shadow var(--duration-fast) var(--ease-standard);
+  }
+
+  .gp-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .gp-input:hover {
+    border-color: var(--border-strong);
+  }
+
+  /* Focus: border-accent + accent-glow ring (DESIGN.md §20). The outline is
+     replaced — never simply removed (DESIGN.md §48). */
+  .gp-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 4px var(--accent-glow);
+  }
+
+  .gp-input[aria-invalid="true"] {
+    border-color: var(--status-danger);
+  }
+
+  .gp-field-error {
+    @apply mt-sm text-caption;
+    color: var(--status-danger);
+  }
+
+  .gp-field-hint {
+    @apply mt-sm block text-caption text-text-muted;
+  }
+
+  .gp-check {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    accent-color: var(--accent-primary);
+  }
+
+  .gp-check-row {
+    @apply flex min-h-11 cursor-pointer items-start gap-md text-body-sm text-text-secondary;
+  }
+
+  /* --- Choice rows + duration chips (DESIGN.md §26, §27) ------------ */
+
+  .gp-choice-list {
+    @apply flex flex-col gap-sm;
+  }
+
+  .gp-choice {
+    position: relative;
+    @apply flex min-h-11 cursor-pointer items-center gap-lg rounded-md border border-border-subtle bg-bg-surface px-lg py-md transition duration-fast ease-standard;
+  }
+
+  .gp-choice:hover {
+    @apply border-border-strong bg-bg-hover;
+  }
+
+  .gp-choice:focus-within {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 4px var(--accent-glow);
+  }
+
+  .gp-choice[data-selected="true"] {
+    @apply border-border-accent bg-bg-hover;
+  }
+
+  .gp-choice[data-disabled="true"] {
+    @apply pointer-events-none cursor-not-allowed opacity-50;
+  }
+
+  .gp-choice-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .gp-choice-body {
+    @apply flex min-w-0 flex-1 flex-col;
+  }
+
+  .gp-choice-title {
+    @apply text-body-sm text-text-primary;
+  }
+
+  .gp-choice-meta {
+    @apply text-caption text-text-secondary;
+  }
+
+  .gp-choice-status {
+    @apply shrink-0 text-caption;
+  }
+
+  .gp-choice-status[data-tone="good"] {
+    color: var(--status-success);
+  }
+
+  .gp-choice-status[data-tone="warn"] {
+    color: var(--status-warning);
+  }
+
+  .gp-choice-status[data-tone="bad"] {
+    color: var(--status-danger);
+  }
+
+  .gp-choice-status[data-tone="muted"] {
+    color: var(--text-muted);
+  }
+
+  .gp-chip-row {
+    @apply flex flex-wrap gap-sm;
+  }
+
+  .gp-chip {
+    position: relative;
+    @apply inline-flex min-h-11 cursor-pointer items-center rounded-md border border-border-subtle bg-bg-surface px-lg text-body-sm text-text-secondary transition duration-fast ease-standard;
+  }
+
+  .gp-chip:hover {
+    @apply border-border-strong bg-bg-hover text-text-primary;
+  }
+
+  .gp-chip:focus-within {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 4px var(--accent-glow);
+  }
+
+  .gp-chip[data-active="true"] {
+    @apply border-border-accent bg-bg-hover text-text-primary;
+  }
+
+  /* --- Banners (DESIGN.md §44 error, §45/§43 notices) -------------- */
+
+  .gp-banner {
+    @apply mb-lg rounded-md border px-lg py-md text-body-sm;
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
+  }
+
+  .gp-banner-danger {
+    border-color: var(--status-danger);
+  }
+
+  .gp-banner-warning {
+    border-color: var(--status-warning);
+  }
+}
+
+/* =====================================================================
+   KEYFRAMES
+   ===================================================================== */
+
+/* Particle drift — bounded hero exception (DESIGN.md §23/§46 amendment,
+   ADR-008): ≤6px travel, slow cycle, fully disabled under reduced motion. */
+@keyframes gp-particle-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.28;
+  }
+  50% {
+    transform: translate3d(0, -6px, 0);
+    opacity: 0.6;
+  }
+}
+
+/* Success badge — scale 0.98 → 1 (DESIGN.md §46 allowed entrance). */
+@keyframes gp-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes gp-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes gp-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* =====================================================================
+   REDUCED MOTION (DESIGN.md §47)
+   ===================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Extra guarantees: motion is never required for content to be
+     readable or usable (DESIGN.md §47, §68). */
+  .gp-hero-layer {
+    transform: none !important;
+  }
+
+  /* ADR-008: particle/parallax-related motion fully disabled under reduced
+     motion — the dots stay as static decoration only, matching the DESIGN.md
+     §23/§46 amendment and §47. */
+  .gp-particle {
+    animation: none !important;
+    transform: none !important;
+    opacity: 0.35 !important;
+  }
+
+  .gp-success-badge {
+    animation: none !important;
+  }
+
+  .gp-wa-float:hover,
+  .gp-wa-float:active {
+    transform: none !important;
+  }
+
+  .gp-skeleton::after {
+    animation: none !important;
+  }
+
+  .gp-rise,
+  .gp-reveal {
+    animation-delay: 0s !important;
+    transition-delay: 0s !important;
+  }
+
+  /* Reveal must never leave content waiting to become visible under reduced
+     motion (DESIGN.md §47, §68) — even before hydration, and regardless of
+     framer-motion's inline styles. */
+  .gp-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .gp-game-card,
+  .gp-game-card:hover,
+  .gp-game-card:focus-within {
+    transform: none !important;
+  }
+
+  .gp-card-media img,
+  .gp-media-fallback,
+  .gp-card-arrow {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Content must never depend on JavaScript for visibility. */
+@media (scripting: none) {
+  .gp-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
