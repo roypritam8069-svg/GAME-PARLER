@@ -116,3 +116,12 @@ desktop.ini
 .env
 .env.local
 .env.*.local
+
+# Temp files
+.tmp-proof/
+*.done
+probe.txt
+proof.json
+f_*.txt
+tmp-*.mjs
+tmp-*.cmd
